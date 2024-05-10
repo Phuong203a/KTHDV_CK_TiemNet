@@ -12,7 +12,6 @@ openShopping.addEventListener('click', ()=>{
 PayShopping.addEventListener('click', ()=>{
     body.classList.add('active');
 })
-
 let products = [
     {
         id: 1,
