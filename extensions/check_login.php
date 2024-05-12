@@ -15,11 +15,13 @@ function redirectMainPageByRole($role_id)
             header('Location: Home.php');
             break;
     }
+    exit();
 }
 function redirectToAdmin()
 {
     if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === "true" && $_SESSION['id_role']==1) {
         header('Location: admin.php');
+        exit();
     }
 }
 function checkLogin($isLoginPage = false)
@@ -28,6 +30,7 @@ function checkLogin($isLoginPage = false)
         if ($isLoginPage)
         {
             redirectMainPageByRole($_SESSION['id_role']);
+            exit();
         }
     }
     else
