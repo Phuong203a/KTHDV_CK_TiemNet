@@ -1,0 +1,20 @@
+body{
+    background-color: #E3E7E8;
+    font-family: system-ui;
+}
+.container{
+    width: 1000px;
+    margin: auto;
+    transition: 0.5s;
+}
+img {
+    width: 38%;
+    height: 100px;
+    margin: auto;
+}
+.card {
+    display: inline-block;
+    text-align: center;
+    width: 20%;
+    height: 100%;
+}
