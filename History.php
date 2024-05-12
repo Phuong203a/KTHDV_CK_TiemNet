@@ -1,3 +1,13 @@
+<?php
+include('php/connection.php');
+session_start();
+
+if (!isset($_SESSION['user_id'])) {
+    header("Location: index.php");
+    exit;
+}
+$user_id = $_SESSION['user_id'];
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -26,45 +36,89 @@
   </div>
 </nav>
 <body style="font-family: 'Times New Roman', Times, serif; font-size: 20px; ">
-        <table class="table" style="margin-top: 3%; margin-left: 5%;">
-          <thead>
-            <tr>
-              <th scope="col">ID</th>
-              <th scope="col">Name</th>
-              <th scope="col">ID sevice</th>
-              <th scope="col">ID zone</th>
-              <th scope="col">ID computer</th>
-              <th scope="col">Description</th>
-              <th scope="col">DateTime</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>1</td>
-              <td>A123</td>
-              <td>Food_01</td>
-              <td>Mì xào bò</td>
-              <td>20.000</td>
-              <td>Không hành</td>
-              <td>20/12/2024 22:30:02</td>
-            </tr>
-          </tbody>
-          <tbody>
-            <tr>
-              <td>1</td>
-              <td>A123</td>
-              <td>Food_01</td>
-              <td>Mì xào bò</td>
-              <td>20.000</td>
-              <td>Không hành</td>
-              <td>20/12/2024 22:30:02</td>
-            </tr>
-          </tbody>
-        </table>
-      </body>
+<div class="container">
+<?php
+  $stmt = $dbCon->prepare("SELECT * FROM history WHERE id_user = :user_id");
+  $stmt->bindParam(':user_id', $user_id);
+  $stmt->execute();
+  if ($stmt->rowCount() > 0) {
+    // Bắt đầu hiển thị dữ liệu trong bảng
+    echo '<table class="table">';
+    echo '<thead>';
+    echo '<tr>';
+    echo '<th scope="col">ID</th>';
+    echo '<th scope="col">ID computer</th>';
+    echo '<th scope="col">Total</th>';
+    echo '<th scope="col">DateTime</th>';
+    echo '<th scope="col">Invoice</th>';
+    echo '</tr>';
+    echo '</thead>';
+    echo '<tbody>';
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+      echo '<tr>';
+      echo '<td>' . $row['id'] . '</td>';
+      echo '<td>' . $row['id_computer'] . '</td>';
+      echo '<td>' . $row['total'] . ' VND</td>';
+      echo '<td>' . $row['time'] . '</td>';
+      echo '<td><button type="button" class="btn btn-info" data-toggle="modal" data-target="#myModal" onclick="loadDetails('. $row['id'] .')"> Chi tiết </button></td>';
+      echo '</tr>';
+  }
+  echo '</tbody>';
+  echo '</table>';
+  } else {
+    echo '<p> Không có thông tin lịch sử thanh toán. </p>';
+  }
+?>
+  <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title" id="myModalLabel">Thông tin chi tiết</h4>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <div id="details">
+
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
-  </body>
-  </html>
+</body>
+<script>
+function loadDetails(historyId) {
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', 'api/get_details.php?id=' + historyId, true);
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState === XMLHttpRequest.DONE) {
+      if (xhr.status === 200) {
+        var response = JSON.parse(xhr.responseText);
+        displayDetails(response);
+      } else {
+        alert('Có lỗi xảy ra khi tải thông tin.');
+      }
+    }
+  };
+  xhr.send();
+}
+function displayDetails(details) {
+  var html = '<ul>';
+  html += '<li>ID User: ' + details.id_user + '</li>';
+  html += '<li>ID Computer: ' + details.id_computer + '</li>';
+  html += '<li>Total Price: ' + details.total_price + '</li>';
+  html += '<li>Time: ' + details.time + '</li>';
+  html += '<li>Product Details:</li>';
+  html += '<ul>';
+  details.product_details.forEach(function(product) {
+    html += '<li>Name: ' + product.name + '</li>';
+    html += '<li>Quantity: ' + product.quantity + '</li>';
+    html += '<li>Price:  ' + product.price + '</li>';
+  });
+  html += '</ul>';
+  html += '</ul>'; 
+  document.getElementById('details').innerHTML = html;
+}
+</script>
+</html>
   

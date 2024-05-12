@@ -76,7 +76,6 @@ $roleInfo = $stmt->fetch(PDO::FETCH_ASSOC);
                 <th scope="col">Địa chỉ</th>
                 <th scope="col">Số dư</th>
                 <th scope="col"></th>
-                <th scope="col"></th>
             </tr>
         </thead>
         <tbody>
@@ -92,8 +91,9 @@ $roleInfo = $stmt->fetch(PDO::FETCH_ASSOC);
                 <td><?php echo $row['balance']; ?></td>
                 
                 <?php if ($roleInfo['Id_role'] == 3): ?>
-                    <td><a class="btn btn-danger"
-                        href="deleteAccount.php?username=<?php echo $row['username']; ?>">Delete</a></td>
+                    <td><a class="btn btn-info"
+                        href="addAmount.php?username=<?php echo $row['username']; ?>">Nạp tiền</a></td>
+                    
                 <?php endif; ?>
             </tr>
             <?php endforeach; ?>

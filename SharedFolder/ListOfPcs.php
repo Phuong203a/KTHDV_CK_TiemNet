@@ -2,94 +2,259 @@
 include('../php/connection.php');
 session_start();
 
-
-if (isset($_GET['name'])) {
-    if($_GET['name'] == 'Zone A'){
-        $id_zone = 1;
-    }elseif ($_GET['name'] == 'Zone B'){
-        $id_zone = 2;
-    }
-    $sqlListAcc = "SELECT * FROM computer WHERE zone_id = $id_zone";
-    $stmtListAcc = $dbCon->prepare($sqlListAcc);
-    $stmtListAcc->execute();
-    $AccInfo  = $stmtListAcc->fetchAll(PDO::FETCH_ASSOC);
-}
-
-
 $username = $_SESSION['username'];
 $Id_role = "SELECT Id_role FROM user WHERE username = ?";
 $stmt = $dbCon->prepare($Id_role);
 $stmt->execute([$username]);
 $roleInfo = $stmt->fetch(PDO::FETCH_ASSOC);
+
 ?>
+<script>
+var selectedID = -1;
+function setID(id)
+{
+    selectedID = id;
+    console.log("set id: " + selectedID);
+}
+
+function deleteComputer()
+{
+    if (selectedID == -1)
+        return;
+    $.post('', {action:'delete', id: selectedID })
+        .done(function(response) {
+        //console.log('Zone deleted successfully:', response);
+        alert("Xóa dữ liệu thành công");
+        location.reload();
+      })
+      .fail(function(error) {
+        console.error('Failed to delete zone:', error);
+        // Xử lý lỗi nếu có
+      });
+}
+
+</script>
+
+<?php
+require_once '../services/zone_service.php';
+$allZone = getAllZone();
+$zoneData = array();
+$zoneData[] = array(
+    "ID" => 0,
+    "name" => "Tất cả",
+    "price_per_hour" => "###"
+);
+if ($allZone->num_rows > 0) {
+    // Duyệt qua từng hàng và hiển thị dữ liệu
+    while ($row = $allZone->fetch_assoc()) {
+        $ID = $row["id"];
+        $name = $row["name"];
+        $price_per_hour = $row["price_per_hour"];
+        $zoneData[] = array(
+            "ID" => $ID,
+            "name" => $name,
+            "price_per_hour" => $price_per_hour
+        );
+    }
+}
+
+function showComboBoxZone($zoneData)
+{
+    echo '<select class="form-select" name="zone" id="zone" onchange="filterZone()">';
+    foreach ($zoneData as $data) {
+        $zoneId = $data["ID"];
+        $name = $data["name"];
+        $price_per_hour = $data["price_per_hour"];
+        echo '<option cost="'.$price_per_hour.'" value="' . $zoneId . '">' . $name . '</option>';
+    }
+    echo '</select>';
+}
+
+function showComputer($ID, $name, $serial, $zone_id, $zoneData, $state = '')
+{
+    $zone_name = "";
+    foreach ($zoneData as $data)
+    {
+        if ($data["ID"] == $zone_id)
+        {
+            $zone_name = $data["name"];
+            break;
+        }
+    }
+
+    $html = '<div class="card card-'.$zone_id.'" style="width: 18rem;">';
+    $html .= '<img src="../image/PC.jpg" class="card-img-top"style="height:295px" alt="...">';
+    $html .= '<div class="card-body">';
+    $html .= '    <h3>Zone: '.$zone_name.'</h3>';
+    $html .= '    <h5>ID: '.$ID.'</h5>';
+    $html .= '    <p>Name: '.$name.'</p>';
+    $html .= '    <p>Serial: '.$serial.'</p>';
+    $html .= '    <p hidden class="card-text"style="color: red;">Không hoạt động</p>';
+    $html .= '</div>';
+
+    $html .= '<a href="./edit.php?id='.$ID.'" style="color: green !important;"><div class="card-footer text-center btn-light" type="button">';
+    $html .= '<h4>Chỉnh sửa thông tin</h4></a>';
+    $html .= '</div>';
+    $html .= '<button onclick="setID('.$ID.')" type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">Xóa</button>';
+
+
+    $html .= '</div>';
+
+    echo $html;
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Viking</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Chivo+Mono:wght@900&family=Roboto:wght@900&family=Ultra&family=Yeseva+One&display=swap"
-        rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js" integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V" crossorigin="anonymous">
-    </script>
-    <link rel="stylesheet" href="./css/style_service.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.2.1/dist/css/bootstrap.min.css"
+        integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.6/dist/umd/popper.min.js"
+        integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.2.1/dist/js/bootstrap.min.js"
+        integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k"
+        crossorigin="anonymous"></script>
+    <title>Computer</title>
 </head>
-<style>
-    .card{
-        margin-top: 20px;
-    }
-        
-    </style>
+
+
 <body>
-<?php
-    function checkLogin()
-    {
-        if ($_SESSION['login']=true) {
-            echo '<script type ="text/javascript">
-                alert("Vui lòng đăng nhập để sử dụng chức năng này");
-                window.location.href = "http://localhost/";
-                </script>';
-        } 
-    }
-?>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo03" aria-controls="navbarTogglerDemo03" aria-expanded="false" aria-label="Toggle navigation">
   <span class="navbar-toggler-icon"></span></button>
-    <a href="ListOfZone.php" class="btn btn-primary" style="margin-left: 10px">Quay lại</a> 
-  
+  <?php if ($roleInfo['Id_role'] == 1): ?>
+    <a href="../Admin/AdminHomepage.php" class="btn btn-primary" style="margin-left: 10px">Quay lại</a> 
+  <?php elseif ($roleInfo['Id_role'] == 3): ?>
+    <a href="../Staff/StaffHomepage.php" class="btn btn-primary" style="margin-left: 10px">Quay lại</a> 
+  <?php endif; ?>
+  <div class="collapse navbar-collapse" id="navbarsExample02">
+        <ul class="navbar-nav mr-auto">
+        
+        <li class="nav-item <?=$li[1]?>">
+            <a class="nav-link" href="./computer/add.php">Thêm Máy tính</a>
+        </li>
+        <li class="nav-item <?=$li[1]?>">
+            <a class="nav-link" href="./ListOfZone.php">Quản lý Khu vực</a>
+        </li>
+        </ul>
+        <!-- <form class="form-inline my-2 my-md-0">
+        <input class="form-control" type="text" placeholder="Search">
+        </form> -->
+    </div>
   
 </nav>
-<div class="container">
-<table class="table" style="margin-top: 6%;">
-        <thead>
-            <tr>
-                <th scope="col">Name </th>
-                <th scope="col">Serial</th>
-                <th scope="col">Trạng thái</th>
-                
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($AccInfo as $row): ?>
-            <tr>
-                <td><?php echo $row['Name']; ?></td>
-                <td><?php echo $row['Serial']; ?></td>
-                <td><?php echo $row['status']; ?></td>
-                
-                   
-            </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
 
-
-</div>
-
+    <div style="margin: 1%; background-color: rgb(255, 255, 255);">
+        <!-- <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo03"
+                aria-controls="navbarTogglerDemo03" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <a class="navbar-brand" href="#">VIKING</a>
+        </nav> -->
+        <br>
+        <div>
+            <!-- <h5>Zone: Nomal_01</h5> -->
+            <?php
+                showComboBoxZone($zoneData);
+            ?>
+            <h5>Giá: <p id="zone_price">###</p></h5>
+        </div>
+        <div class="card-deck">
+        <?php
+        require_once '../services/computer_service.php';
+            $allComputers = getAllComputer();
+            
+            $img_paths = ["../image/PC.jpg"];
+            $length = count($img_paths);
+            global $table_name, $col_id, $col_name, $col_serial, $col_zone_id;
+            if ($allComputers->num_rows > 0) {
+                // Duyệt qua từng hàng và hiển thị dữ liệu
+                $count = -1;
+                while ($row = $allComputers->fetch_assoc()) {
+                    $count = ($count+1)%$length;
+                    $Id = $row[$col_id];
+                    $name = $row[$col_name];
+                    $serial = $row[$col_serial];
+                    $zone_id = $row[$col_zone_id];
+                    showComputer($ID, $name, $serial, $zone_id, $zoneData);
+                }
+            }
+        ?>
+        </div>
 </body>
+
 </html>
+
+
+<script>
+    function filterZone()
+    {
+        var selectedOption = $('#zone').find(':selected');
+        console.log(selectedOption);
+        var cost = selectedOption.attr("cost");
+        var zone_price = $("#zone_price");
+        zone_price.text(cost + "đ/giờ",);
+
+        var selectedZone = $("#zone").val();
+        console.log("filter: " + '.card-' + selectedZone);
+        if (selectedZone === "0") {
+            $('.card').show();
+            } else {
+            $('.card').hide();
+            $('.card-' + selectedZone).show();
+        }
+    }
+</script>
+
+
+
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        Bạn có chắc muốn xóa dữ liệu này chứ?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+        <button id="btn-yes" onclick="deleteComputer()" type="button" class="btn btn-primary">Đồng ý</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal -->
+
+
+<?php
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    if ($_POST['action'] === 'delete')
+    {
+        $ID = $_POST['id'];
+        $result = deleteComputer($ID);
+        if ($result === TRUE)
+        {
+            //header("Refresh:0");
+        }
+        else
+        {
+            alert("Có lỗi xảy ra");
+        }
+    }
+}
+
+?>

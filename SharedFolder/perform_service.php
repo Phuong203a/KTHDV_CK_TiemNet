@@ -1,18 +1,6 @@
 <?php
 include('../php/connection.php');
 session_start();
-
-
-// $sqlListAcc = "SELECT * FROM paymenthistory";
-// $stmtListAcc = $dbCon->prepare($sqlListAcc);
-// $stmtListAcc->execute();
-// $AccInfo  = $stmtListAcc->fetchAll(PDO::FETCH_ASSOC);
-
-// $username = $_SESSION['username'];
-// $Id_role = "SELECT Id_role FROM user WHERE username = ?";
-// $stmt = $dbCon->prepare($Id_role);
-// $stmt->execute([$username]);
-// $roleInfo = $stmt->fetch(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -30,6 +18,9 @@ session_start();
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js" integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V" crossorigin="anonymous">
     </script>
+     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="./css/style_service.css">
 </head>
 <style>
@@ -58,34 +49,88 @@ session_start();
   
 </nav>
 <div class="container">
-<table class="table" style="margin-top: 6%;">
-        <!-- <thead>
-            <tr>
-                <th scope="col">ID </th>
-                <th scope="col">Giá tiền</th>
-                <th scope="col">Cách thức</th>
-                <th scope="col">Trạng thái</th>
-                <th scope="col">Thời gian</th>
-                <th scope="col"></th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($AccInfo as $row): ?>
-            <tr>
-                <td><?php echo $row['id_user']; ?></td>
-                <td><?php echo $row['amount']; ?></td>
-                <td><?php echo $row['action']; ?></td>
-                <td><?php echo $row['status']; ?></td>
-                <td><?php echo $row['time']; ?></td>
-                <td><a class="btn btn-primary" href="ListOfPcs.php?name=<?php echo $row['name']; ?>">Xác nhận</a></td>
-                   
-            </tr>
-            <?php endforeach; ?>
-        </tbody> -->
-    </table>
+<?php
+  $stmt = $dbCon->prepare("SELECT * FROM history");
+  $stmt->execute();
+  if ($stmt->rowCount() > 0) {
+    // Bắt đầu hiển thị dữ liệu trong bảng
+    echo '<table class="table">';
+    echo '<thead>';
+    echo '<tr>';
+    echo '<th scope="col">ID</th>';
+    echo '<th scope="col">ID computer</th>';
+    echo '<th scope="col">Total</th>';
+    echo '<th scope="col">DateTime</th>';
+    echo '<th scope="col">Invoice</th>';
+    echo '</tr>';
+    echo '</thead>';
+    echo '<tbody>';
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+      echo '<tr>';
+      echo '<td>' . $row['id'] . '</td>';
+      echo '<td>' . $row['id_computer'] . '</td>';
+      echo '<td>' . $row['total'] . ' VND</td>';
+      echo '<td>' . $row['time'] . '</td>';
+      echo '<td><button type="button" class="btn btn-info" data-toggle="modal" data-target="#myModal" onclick="loadDetails('. $row['id'] .')"> Chi tiết </button></td>';
+      echo '</tr>';
+  }
+  echo '</tbody>';
+  echo '</table>';
+  } else {
+    echo '<p> Không có thông tin lịch sử thanh toán. </p>';
+  }
+?>
+  <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title" id="myModalLabel">Thông tin chi tiết</h4>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <div id="details">
 
-
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
-
 </body>
+<script>
+function loadDetails(historyId) {
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', '../api/get_details.php?id=' + historyId, true);
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState === XMLHttpRequest.DONE) {
+      if (xhr.status === 200) {
+        var response = JSON.parse(xhr.responseText);
+        displayDetails(response);
+      } else {
+        alert('Có lỗi xảy ra khi tải thông tin.');
+      }
+    }
+  };
+  xhr.send();
+}
+function displayDetails(details) {
+  var html = '<ul>';
+  html += '<li>ID User: ' + details.id_user + '</li>';
+  html += '<li>Name: ' + details.name + '</li>';
+  html += '<li>ID Computer: ' + details.id_computer + '</li>';
+  html += '<li>Total Price: ' + details.total_price + '</li>';
+  html += '<li>Time: ' + details.time + '</li>';
+  html += '<li>Product Details:</li>';
+  html += '<ul>';
+  details.product_details.forEach(function(product) {
+    html += '<li>Name: ' + product.name + '</li>';
+    html += '<li>Quantity: ' + product.quantity + '</li>';
+    html += '<li>Price:  ' + product.price + '</li>';
+  });
+  html += '</ul>';
+  html += '</ul>'; 
+  document.getElementById('details').innerHTML = html;
+}
+</script>
 </html>
+  

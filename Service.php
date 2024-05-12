@@ -97,7 +97,10 @@ session_start();
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <!-- Here goes the content of the shopping cart -->
+       <div class="mb-3">
+          <label for="machineId" class="form-label">Machine ID</label>
+          <input type="text" class="form-control" id="machineId" placeholder="Enter Machine ID">
+        </div>
         <table class="table">
           <thead>
             <tr>
@@ -151,10 +154,6 @@ session_start();
         ?>
       </div>
       <div class="modal-footer">
-        <div class="form-group">
-            <label for="notes">Notes</label>
-            <textarea class="form-control" id="notes" rows="3"></textarea>
-        </div>
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
         <?php 
           if (isset($_SESSION['cart']) && !empty($_SESSION['cart'])) {
@@ -166,28 +165,37 @@ session_start();
   </div>
 </div>
 <script>
-    function CashPayment() {
-      var xhr = new XMLHttpRequest();
-      xhr.open("POST", "api/remove_cart.php", true);
-      xhr.setRequestHeader("Content-Type", "application/json");
-      xhr.onreadystatechange = function() {
-        if (xhr.readyState === 4) {
-            if (xhr.status === 200) {
-                // Phản hồi thành công
-                var response = JSON.parse(xhr.responseText);
-                alert("Nhân viên sẽ đến thu tiền trong vài phút.");
-                location.reload();
-            } else {
-                // Xảy ra lỗi khi gửi yêu cầu
-                alert("Failed to clear cart. Please try again later.");
-            }
-        }
-    };
-
-    // Gửi yêu cầu POST đến API
-    xhr.send();
+  function CashPayment() {
+    var machineId = document.getElementById("machineId").value;
+    if (machineId.trim() !== "") {
+        console.log("Machine ID submitted:", machineId);
+    } else {
+        alert("Please enter a valid Machine ID.");
     }
-    function processPayment() {
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "api/cash_payment.php", true);
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === 4) {
+          if (xhr.status === 200) {
+              var response = JSON.parse(xhr.responseText);
+              alert("Nhân viên sẽ đến thu tiền trong vài phút.");
+              location.reload();
+          }else {
+            alert("Failed to clear cart. Please try again later.");
+          }
+        }
+  };
+  var data = "computer_id=" + encodeURIComponent(machineId);
+  xhr.send(data);
+  }
+  function processPayment() {
+    var machineId = document.getElementById("machineId").value;
+    if (machineId.trim() !== "") {
+        console.log("Machine ID submitted:", machineId);
+    } else {
+        alert("Please enter a valid Machine ID.");
+    }
     var xhr = new XMLHttpRequest();
     xhr.open('POST', 'api/payment.php', true);
     xhr.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
@@ -207,11 +215,11 @@ session_start();
                 window.location.reload();
             }
         }
-    };
-    xhr.send();
-}
-
-    function addToCart(productId) {
+    }
+    var data = "computer_id=" + encodeURIComponent(machineId);
+    xhr.send(data);
+    }
+  function addToCart(productId) {
     fetch('api/add_to_cart.php?id=' + productId)
         .then(response => {
             if (!response.ok) {
