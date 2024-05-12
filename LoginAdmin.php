@@ -2,7 +2,7 @@
 require_once 'extensions/debug.php';
 require_once 'services/useraccount_service.php';
 require_once 'extensions/check_login.php';
-checkLogin(true);
+// checkLogin(true);
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Lấy dữ liệu từ yêu cầu POST
     $username = $_POST['username'];
