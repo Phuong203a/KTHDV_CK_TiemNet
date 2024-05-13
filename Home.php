@@ -1,6 +1,6 @@
 <?php
 require_once 'extensions/check_login.php';
-redirectToAdmin();
+//redirectToAdmin();
 ?>
 
 <!DOCTYPE html>
