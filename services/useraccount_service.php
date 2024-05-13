@@ -1,13 +1,13 @@
 <?php
 require_once 'db_connection.php';
-$table_name = "useraccount";
+$table_name = "user";
 
 $col_ID = "ID";
 $col_name = "name";
-$col_id_role = "id_role";
-$col_phone_number = "phone_number";
+$col_id_role = "Id_role";
+$col_phone_number = "phone";
 $col_username = "username";
-$col_password = "password";
+$col_password = "Password";
 $col_birthday = "birthday";
 $col_balance = "balance";
 $col_address = "address";
@@ -43,6 +43,8 @@ function insertAccount($name, $id_role, $phone_number, $username, $password, $bi
     VALUES ('$name', $id_role, '$phone_number', '$username', '$password', '$birthday', $balance, '$address', '$email')";
     $result = $conn->query($sql);
     // Đóng kết nối
+
+    echo $sql;
     $conn->close();
     if ($result === TRUE) {
         return TRUE;

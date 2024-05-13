@@ -101,7 +101,8 @@ if ($allZone->num_rows > 0) {
         $price_per_hour = $row[$col_price_per_hour];
         $keyboard = $row[$col_keyboard];
         $mouse = $row[$col_mouse];
-        $headphone = $row[$col_headphone];
+        // $headphone = $row[$col_headphone];
+        $headphone = "headphone";
         $cpu = $row[$col_cpu];
         $ram = $row[$col_ram];
         $card = $row[$col_card];

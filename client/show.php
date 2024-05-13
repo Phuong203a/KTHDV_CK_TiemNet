@@ -31,16 +31,16 @@ $allRole = getAllRole();
 $roleData = array();
 $roleData[] = array(
     "ID" => 0,
-    "name" => "Tất cả"
+    "Name" => "Tất cả"
 );
 if ($allRole->num_rows > 0) {
     // Duyệt qua từng hàng và hiển thị dữ liệu
     while ($row = $allRole->fetch_assoc()) {
         $ID = $row["ID"];
-        $name = $row["name"];
+        $name = $row["Name"];
         $roleData[] = array(
             "ID" => $ID,
-            "name" => $name
+            "Name" => $name
         );
     }
 }
@@ -50,7 +50,7 @@ function showComboBoxRole($roleData)
     echo '<select class="form-select" name="id_role" id="id_role" onchange="">';
     foreach ($roleData as $data) {
         $id = $data["ID"];
-        $name = $data["name"];
+        $name = $data["Name"];
         echo '<option value="' . $id . '">' . $name . '</option>';
     }
     echo '</select>';

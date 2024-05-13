@@ -4,16 +4,16 @@ require_once '../services/zone_service.php';
 $allZone = getAllZone();
 $zoneData = array();
 $zoneData[] = array(
-    "ID" => 0,
+    "id" => 0,
     "name" => "Tất cả"
 );
 if ($allZone->num_rows > 0) {
     // Duyệt qua từng hàng và hiển thị dữ liệu
     while ($row = $allZone->fetch_assoc()) {
-        $ID = $row["ID"];
+        $ID = $row["id"];
         $name = $row["name"];
         $zoneData[] = array(
-            "ID" => $ID,
+            "id" => $ID,
             "name" => $name
         );
     }
@@ -23,7 +23,7 @@ function showComboBoxZone($zoneData)
 {
     echo '<select class="form-select" name="zoneID" id="zoneID">';
     foreach ($zoneData as $data) {
-        $zoneId = $data["ID"];
+        $zoneId = $data["id"];
         $name = $data["name"];
         echo '<option value="' . $zoneId . '">' . $name . '</option>';
     }

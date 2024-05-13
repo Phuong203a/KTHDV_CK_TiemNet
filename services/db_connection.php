@@ -4,7 +4,7 @@ function getConnection(){
     $servername = "localhost";
     $username = "root";
     $password = "";
-    $database = "net";
+    $database = "net2";
     $conn = new mysqli($servername, $username, $password, $database);
     // Kiểm tra kết nối
     if ($conn->connect_error) {

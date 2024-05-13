@@ -2,19 +2,22 @@
 require_once '../extensions/debug.php';
 require_once 'db_connection.php';
 $table_name = 'computer';
-$col_id = "ID";
-$col_name="name";
-$col_serial = "serial";
+$col_id = "Id";
+$col_name="Name";
+$col_serial = "Serial";
 $col_zone_id = "zone_id";
+$col_status = "status";
 
 
-function insertComputer($name, $serial, $zone_id)
+function insertComputer($name, $serial, $zone_id, $status='')
 {
-    global $table_name, $col_id, $col_name, $col_serial, $col_zone_id;
+    global $table_name, $col_id, $col_name, $col_serial, $col_zone_id,$col_status;
     $conn = getConnection();
 
-    $sql = "INSERT INTO $table_name ($col_name, $col_serial, $col_zone_id)
-    VALUES ('$name', '$serial', $zone_id)";
+    $sql = "INSERT INTO $table_name ($col_name, $col_serial, $col_zone_id, $col_status)
+    VALUES ('$name', '$serial', $zone_id, '$status')";
+
+    echo $sql;
 
     $result = $conn->query($sql);
     // Đóng kết nối
@@ -26,13 +29,12 @@ function insertComputer($name, $serial, $zone_id)
     }
 }
 
-function updateComputer($id, $name, $serial, $zone_id)
+function updateComputer($id, $name, $serial, $zone_id, $status = '')
 {
-    global $table_name, $col_id, $col_name, $col_serial, $col_zone_id;
+    global $table_name, $col_id, $col_name, $col_serial, $col_zone_id,$col_status;
     $conn = getConnection();
 
-    $sql = "UPDATE $table_name SET $col_name = '$name', $col_serial = '$serial', $col_zone_id = $zone_id WHERE $col_id = $id";
-    echo($sql);
+    $sql = "UPDATE $table_name SET $col_name = '$name', $col_serial = '$serial', $col_zone_id = $zone_id, $col_status = '$status' WHERE $col_id = $id";
 
 
     $result = $conn->query($sql);
@@ -47,7 +49,7 @@ function updateComputer($id, $name, $serial, $zone_id)
 
 function getAllComputer()
 {
-    global $table_name, $col_id, $col_name, $col_serial, $col_zone_id;
+    global $table_name, $col_id, $col_name, $col_serial, $col_zone_id,$col_status;
     $conn = getConnection();
 
     $sql = "SELECT * FROM $table_name";
@@ -57,7 +59,7 @@ function getAllComputer()
 
 function getComputerByID($id)
 {
-    global $table_name, $col_id, $col_name, $col_serial, $col_zone_id;
+    global $table_name, $col_id, $col_name, $col_serial, $col_zone_id,$col_status;
     $conn = getConnection();
     $sql = "SELECT * FROM $table_name WHERE $col_id = $id";
     $result = $conn->query($sql);
@@ -71,10 +73,11 @@ function getComputerByID($id)
 
 function deleteComputer($ID)
 {
-    global $table_name, $col_id, $col_name, $col_serial, $col_zone_id;
+    global $table_name, $col_id, $col_name, $col_serial, $col_zone_id,$col_status;
     $conn = getConnection();
 
     $sql = "DELETE FROM $table_name WHERE $col_id = $ID";
+
     if ($conn->query($sql) === TRUE) {
         return TRUE;
     } else {

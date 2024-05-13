@@ -36,7 +36,7 @@ $zoneData[] = array(
 if ($allZone->num_rows > 0) {
     // Duyệt qua từng hàng và hiển thị dữ liệu
     while ($row = $allZone->fetch_assoc()) {
-        $ID = $row["ID"];
+        $ID = $row["id"];
         $name = $row["name"];
         $price_per_hour = $row["price_per_hour"];
         $zoneData[] = array(

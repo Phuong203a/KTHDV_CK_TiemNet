@@ -1,21 +1,22 @@
 <?php
 require_once 'db_connection.php';
 $table_name = 'zone';
-$col_id = "ID";
+$col_id = "id";
 $col_name="name";
 $col_price_per_hour = "price_per_hour";
 $col_keyboard = "keyboard";
 $col_mouse = "mouse";
-$col_headphone="headphone";
+$col_headphone="Monitor";
 $col_cpu = "CPU";
-$col_ram = "RAM";
+$col_ram = "Ram";
 $col_card = "Card";
+$col_monitor = "Monitor";
 $col_chair = "Chair";
 
 
 function insertZone($name, $price_per_hour, $keyboard, $mouse,$headphone,$cpu,$ram,$card,$chair)
 {
-    global $table_name, $col_id, $col_name, $col_price_per_hour, $col_keyboard, $col_mouse, $col_headphone, $col_cpu, $col_ram, $col_card, $col_chair;
+    global $table_name, $col_id, $col_name, $col_price_per_hour, $col_keyboard, $col_mouse, $col_headphone, $col_cpu, $col_ram, $col_card, $col_chair, $col_monitor;
     $conn = getConnection();
 
     $sql = "INSERT INTO $table_name ($col_name, $col_price_per_hour, $col_keyboard, $col_mouse, $col_headphone, $col_cpu, $col_ram, $col_card, $col_chair)
@@ -33,7 +34,7 @@ function insertZone($name, $price_per_hour, $keyboard, $mouse,$headphone,$cpu,$r
 
 function updateZone($id, $name, $price_per_hour, $keyboard, $mouse, $headphone, $cpu, $ram, $card, $chair)
 {
-    global $table_name, $col_id, $col_name, $col_price_per_hour, $col_keyboard, $col_mouse, $col_headphone, $col_cpu, $col_ram, $col_card, $col_chair;
+    global $table_name, $col_id, $col_name, $col_price_per_hour, $col_keyboard, $col_mouse, $col_headphone, $col_cpu, $col_ram, $col_card, $col_chair, $col_monitor;
     $conn = getConnection();
 
     $sql = "UPDATE $table_name SET $col_name = '$name', $col_price_per_hour = $price_per_hour, $col_keyboard = '$keyboard', $col_mouse = '$mouse', $col_headphone = '$headphone', $col_cpu = '$cpu', $col_ram = '$ram', $col_card = '$card', $col_chair = '$chair' WHERE $col_id = $id";
@@ -50,7 +51,7 @@ function updateZone($id, $name, $price_per_hour, $keyboard, $mouse, $headphone, 
 
 function getAllZone()
 {
-    global $table_name, $col_id, $col_name, $col_price_per_hour, $col_keyboard, $col_mouse, $col_headphone, $col_cpu, $col_ram, $col_card, $col_chair;
+    global $table_name, $col_id, $col_name, $col_price_per_hour, $col_keyboard, $col_mouse, $col_headphone, $col_cpu, $col_ram, $col_card, $col_chair, $col_monitor;
     $conn = getConnection();
     $sql = "SELECT * FROM $table_name";
     $result = $conn->query($sql);
@@ -59,7 +60,7 @@ function getAllZone()
 
 function getZoneByID($id)
 {
-    global $table_name, $col_id, $col_name, $col_price_per_hour, $col_keyboard, $col_mouse, $col_headphone, $col_cpu, $col_ram, $col_card, $col_chair;
+    global $table_name, $col_id, $col_name, $col_price_per_hour, $col_keyboard, $col_mouse, $col_headphone, $col_cpu, $col_ram, $col_card, $col_chair, $col_monitor;
     $conn = getConnection();
     $sql = "SELECT * FROM $table_name WHERE $col_id = $id";
     $result = $conn->query($sql);
@@ -73,9 +74,10 @@ function getZoneByID($id)
 
 function deleteZone($ID)
 {
-    global $table_name, $col_id, $col_name, $col_price_per_hour, $col_keyboard, $col_mouse, $col_headphone, $col_cpu, $col_ram, $col_card, $col_chair;
+    global $table_name, $col_id, $col_name, $col_price_per_hour, $col_keyboard, $col_mouse, $col_headphone, $col_cpu, $col_ram, $col_card, $col_chair, $col_monitor;
     $conn = getConnection();
     $sql = "DELETE FROM $table_name WHERE $col_id = $ID";
+    echo $sql;
     if ($conn->query($sql) === TRUE) {
         return TRUE;
     } else {
